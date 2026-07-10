@@ -76,44 +76,39 @@
     \end{alertblock}
 
     \column{0.55\textwidth}
-            \begin{center}
-      \begin{tikzpicture}[
-        box/.style={draw=thesisBlue, fill=thesisBg, rounded corners=2pt,
-                    minimum width=2.1cm, minimum height=0.6cm,
-                    font=\scriptsize, align=center},
-        svc/.style={box, fill=thesisAccent!10, draw=thesisAccent},
-        browser/.style={box, fill=thesisBlue!15, minimum width=6.6cm},
-        native/.style={box, fill=thesisGray!25, minimum width=6.6cm, font=\scriptsize\bfseries},
-        arr/.style={->, thick, color=thesisBlue},
-        node distance=0.45cm and 0.3cm,
-        arr_glue/.style={->, thick, dashed, color=thesisAccent},
+    \begin{center}
+    \begin{tikzpicture}[
+      box/.style={draw=thesisBlue, fill=thesisBg, rounded corners=2pt,
+                  minimum width=2.3cm, minimum height=0.6cm,
+                  font=\scriptsize, align=center},
+      todo/.style={box, draw=thesisAccent, dashed, fill=thesisAccent!5},
+      browser/.style={box, fill=thesisBlue!15, minimum width=7.2cm},
+      native/.style={box, fill=thesisGray!25, minimum width=7.2cm, font=\scriptsize\bfseries},
+      arr/.style={->, thick, color=thesisBlue},
+      node distance=0.55cm and 0.5cm,
       ]
-        \node[browser] (browser) {Browser};
-        \node[svc, below=0.5cm of browser, xshift=-2.35cm] (svc1) {Servizio C++};
-        \node[svc, below=0.5cm of browser] (svc2) {Servizio C\#};
-        \node[svc, below=0.5cm of browser, xshift=2.35cm] (svc3) {Servizio Go};
-        \node[box, below=0.7cm of svc1] (t1) {Simulatore\\C++};
-        \node[box, below=0.7cm of svc2] (t2) {Emulatore\\C\#};
-        \node[box, below=0.7cm of svc3] (t3) {Binding\\Go};
-        \node[draw=thesisGray, dashed, rounded corners=2pt, fit=(t1)(t2)(t3), inner sep=0.15cm, label={[font=\tiny, text=thesisGray]above:glue code — duplicato per linguaggio}] (gluebox) {};
-        \node[native, below=0.55cm of t2] (native) {Librerie native};
-        \draw[arr] (browser.south) -- ++(0,-0.2) -| (svc1.north);
-        \draw[arr] (browser.south) -- (svc2.north);
-        \draw[arr] (browser.south) -- ++(0,-0.2) -| (svc3.north);
-        \draw[arr] (svc1) -- (t1);
-        \draw[arr] (svc2) -- (t2);
-        \draw[arr] (svc3) -- (t3);
-        \draw[arr_glue] (svc1) -- (t1);
-        \draw[arr_glue] (svc2) -- (t2);
-        \draw[arr_glue] (svc3) -- (t3);
-        \draw[arr] (t1.south) -- ++(0,-0.3) -| (native.north);
-        \draw[arr] (t2.south) -- (native.north);
-        \draw[arr] (t3.south) -- ++(0,-0.3) -| (native.north);
-      \end{tikzpicture}
-      \\[0.3em]
-    {\scriptsize Tre linguaggi, tre stack, tante librerie native da collegare a mano}
-      \end{center}
+      \node[native] (native) {Librerie native};
+      \node[box, above=0.6cm of native, xshift=-2.5cm] (app1) {App1\\(C++)};
+      \node[box, above=0.6cm of native] (app2) {App2\\(C\#)};
+      \node[box, above=0.6cm of native, xshift=2.5cm] (app3) {App3\\(Go)};
+      \node[todo, above=0.9cm of app1] (svc1) {Servizio\\App1};
+      \node[todo, above=0.9cm of app2] (svc2) {Servizio\\App2};
+      \node[todo, above=0.9cm of app3] (svc3) {Servizio\\App3};
+      \node[browser, above=0.6cm of svc2] (browser) {Browser};
 
+      \draw[arr] (app1.south) -- (native.north -| app1);
+      \draw[arr] (app2.south) -- (native.north);
+      \draw[arr] (app3.south) -- (native.north -| app3);
+      \draw[arr] (svc1.south) -- (app1.north);
+      \draw[arr] (svc2.south) -- (app2.north);
+      \draw[arr] (svc3.south) -- (app3.north);
+      \draw[arr] (browser.south -| svc1) -- (svc1.north);
+      \draw[arr] (browser.south) -- (svc2.north);
+      \draw[arr] (browser.south -| svc3) -- (svc3.north);
+    \end{tikzpicture}
+    \\[0.3em]
+    {\scriptsize Applicativi diversi, ma stesse librerie}
+    \end{center}
   \end{columns}
 \end{frame}
 
@@ -160,13 +155,14 @@
         arr_gen/.style={->, thick, color=thesisBlue!70!black},
       ]
         \node[browser] (browser) {Browser};
-        \node[kotlin, below left=0.6cm and -1.5cm of browser] (ui) {UI Kotlin/JS\\(Compose Multiplatform)};
-        \node[kotlin, below right=0.6cm and -1.2cm of browser] (svc) {Servizio Backend\\(Kotlin/Native)};
-        \node[native, below=0.6cm of svc] (native) {Librerie native (CInterop)};
+        \node[kotlin, below=0.6cm of browser] (ui) {UI Kotlin\\(Compose Multiplatform)};
+        \node[kotlin, below=0.6cm of ui] (svc) {Servizio Backend\\(Kotlin/Native)};
+        \node[kotlin, below=0.6cm of svc] (cinterop) {CInterop bindings};
+        \node[native, below=0.6cm of cinterop] (native) {Librerie native};
         \draw[arr] (browser.south) -- ++(0,-0.2) -| (ui.north);
-        \draw[arr] (browser.south) -- ++(0,-0.2) -| (svc.north);
-        % \draw[arr] (ui.east) -- (svc.west) node[midway, above, font=\tiny] {chiamate};
-        \draw[arr] (svc.south) -| (native.north);
+        \draw[arr] (ui.south) -- ++(0,-0.2) -| (svc.north);
+        \draw[arr] (svc.south) -| (cinterop.north);
+        \draw[arr] (cinterop.south) -| (native.north);
       \end{tikzpicture}
       \\[0.3em]
       {\scriptsize Stesso linguaggio per UI e servizio}
