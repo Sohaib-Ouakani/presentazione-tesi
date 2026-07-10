@@ -1,21 +1,13 @@
-% ============================================================
-%  Template Presentazione Tesi — versione pulita
-%  Compilare con: pdflatex > pdflatex
-%  Oppure carica su Overleaf e premi "Recompile".
-% ============================================================
-
 \documentclass[aspectratio=169]{beamer}
 
-% ── Tema base ───────────────────────────────────────────────
 \usetheme{Madrid}
 \usecolortheme{default}
 
-% ── Palette colori sobria (blu/grigio accademico) ───────────
 \definecolor{thesisBlue}{HTML}{1F3864}
 \definecolor{thesisBlueLight}{HTML}{2E5090}
 \definecolor{thesisGray}{HTML}{4D4D4D}
 \definecolor{thesisBg}{HTML}{F5F5F5}
-\definecolor{thesisAccent}{HTML}{8C1D1D}   % rosso scuro per gli alert, usato con parsimonia
+\definecolor{thesisAccent}{HTML}{8C1D1D}
 
 \setbeamercolor{palette primary}{bg=thesisBlue, fg=white}
 \setbeamercolor{palette secondary}{bg=thesisBlueLight, fg=white}
@@ -25,7 +17,6 @@
 \setbeamercolor{block body}{bg=thesisBg, fg=black}
 \setbeamercolor{alerted text}{fg=thesisAccent}
 
-% ── Pacchetti ───────────────────────────────────────────────
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[italian]{babel}
@@ -36,8 +27,8 @@
 \usepackage{tikz}
 \usepackage{booktabs}
 \usetikzlibrary{positioning}
+\usetikzlibrary{fit}
 
-% ── Stile listings (per eventuale codice) ───────────────────
 \lstset{
   basicstyle=\ttfamily\small,
   keywordstyle=\color{thesisBlue}\bfseries,
@@ -52,7 +43,6 @@
   showstringspaces=false,
 }
 
-% ── Metadati (da compilare) ──────────────────────────────────
 \title{Un linguaggio per domarli tutti: applicazioni full stack con librerie native in Kotlin Multiplatform}
 \author{Sohaib Ouakani}
 \institute{
@@ -65,44 +55,69 @@
 \setbeamertemplate{footline}[frame number]
 \setbeamertemplate{navigation symbols}{}
 
-
-% ============================================================
 \begin{document}
 
-% ── SLIDE TITOLO ─────────────────────────────────────────────
 \begin{frame}
   \titlepage
 \end{frame}
 
-% ── INDICE ───────────────────────────────────────────────────
-\begin{frame}{Indice}
-  \tableofcontents
-\end{frame}
-
-
-% ============================================================
 \section{Contesto}
-% ============================================================
 
 \begin{frame}{Contesto: stack software eterogeneo}
   \begin{columns}
-    \column{0.55\textwidth}
-      \begin{itemize}
-        \item Stack industriali spesso eterogenei
-        \item Librerie di standard tecnici scritte in linguaggi nativi
-        \item Risultato: duplicazione di codice, complessità, manutenzione difficile
-      \end{itemize}
     \column{0.4\textwidth}
-      \begin{block}{Problema}
-        Si può usare un solo linguaggio per l'intero applicativo, mantenendo l'accesso a librerie native di dominio?
-      \end{block}
+        \begin{itemize}
+            \item Stack industriali spesso eterogenei
+            \item Ogni strumento è scritto in linguaggi diversi
+            \item Librerie di standard tecnici scritte in linguaggi nativi
+        \end{itemize}
+    \begin{alertblock}{Problema}
+        Duplicazione di codice, complessità, manutenzione difficile
+    \end{alertblock}
+
+    \column{0.55\textwidth}
+            \begin{center}
+      \begin{tikzpicture}[
+        box/.style={draw=thesisBlue, fill=thesisBg, rounded corners=2pt,
+                    minimum width=2.1cm, minimum height=0.6cm,
+                    font=\scriptsize, align=center},
+        svc/.style={box, fill=thesisAccent!10, draw=thesisAccent},
+        browser/.style={box, fill=thesisBlue!15, minimum width=6.6cm},
+        native/.style={box, fill=thesisGray!25, minimum width=6.6cm, font=\scriptsize\bfseries},
+        arr/.style={->, thick, color=thesisBlue},
+        node distance=0.45cm and 0.3cm,
+        arr_glue/.style={->, thick, dashed, color=thesisAccent},
+      ]
+        \node[browser] (browser) {Browser};
+        \node[svc, below=0.5cm of browser, xshift=-2.35cm] (svc1) {Servizio C++};
+        \node[svc, below=0.5cm of browser] (svc2) {Servizio C\#};
+        \node[svc, below=0.5cm of browser, xshift=2.35cm] (svc3) {Servizio Go};
+        \node[box, below=0.7cm of svc1] (t1) {Simulatore\\C++};
+        \node[box, below=0.7cm of svc2] (t2) {Emulatore\\C\#};
+        \node[box, below=0.7cm of svc3] (t3) {Binding\\Go};
+        \node[draw=thesisGray, dashed, rounded corners=2pt, fit=(t1)(t2)(t3), inner sep=0.15cm, label={[font=\tiny, text=thesisGray]above:glue code — duplicato per linguaggio}] (gluebox) {};
+        \node[native, below=0.55cm of t2] (native) {Librerie native};
+        \draw[arr] (browser.south) -- ++(0,-0.2) -| (svc1.north);
+        \draw[arr] (browser.south) -- (svc2.north);
+        \draw[arr] (browser.south) -- ++(0,-0.2) -| (svc3.north);
+        \draw[arr] (svc1) -- (t1);
+        \draw[arr] (svc2) -- (t2);
+        \draw[arr] (svc3) -- (t3);
+        \draw[arr_glue] (svc1) -- (t1);
+        \draw[arr_glue] (svc2) -- (t2);
+        \draw[arr_glue] (svc3) -- (t3);
+        \draw[arr] (t1.south) -- ++(0,-0.3) -| (native.north);
+        \draw[arr] (t2.south) -- (native.north);
+        \draw[arr] (t3.south) -- ++(0,-0.3) -| (native.north);
+      \end{tikzpicture}
+      \\[0.3em]
+    {\scriptsize Tre linguaggi, tre stack, tante librerie native da collegare a mano}
+      \end{center}
+
   \end{columns}
 \end{frame}
 
-
-% ============================================================
 \section{Approcci esistenti}
-% ============================================================
 
 \begin{frame}{Approcci esistenti}
   \begin{columns}
@@ -118,89 +133,127 @@
   \end{columns}
 \end{frame}
 
-
-% ============================================================
 \section{La Soluzione Proposta}
-% ============================================================
 
 \begin{frame}{La soluzione}
-  \begin{block}{Kotlin Multiplatform + CInterop}
-    Applicazione fullstack multipiattaforma in Kotlin, con accesso diretto al nativo tramite CInterop
-  \end{block}
-  \vspace{0.6em}
-  \begin{itemize}
-    \item Un solo linguaggio per tutto lo stack: Kotlin
-    \item Interfaccia diretta con C tramite CInterop
-    \item Nessun layer di astrazione intermedio
-  \end{itemize}
+  \begin{columns}
+    \column{0.42\textwidth}
+      \begin{block}{Kotlin Multiplatform + CInterop}
+        \begin{itemize}
+          \item Un solo linguaggio per tutto lo stack: Kotlin
+          \item Interfaccia diretta con C tramite CInterop
+          \item Nessun layer di astrazione intermedio
+        \end{itemize}
+      \end{block}
+      \vspace{0.4em}
+    \column{0.55\textwidth}
+      \begin{center}
+      \begin{tikzpicture}[
+        box/.style={draw=thesisBlue, fill=thesisBg, rounded corners=2pt,
+                    minimum width=2.9cm, minimum height=0.75cm,
+                    font=\scriptsize, align=center},
+        browser/.style={box, fill=thesisBlue!15, minimum width=3.6cm},
+        kotlin/.style={box, fill=thesisBlue!35, font=\scriptsize\bfseries},
+        native/.style={box, fill=thesisGray!25, minimum width=4.6cm, font=\scriptsize\bfseries},
+        arr/.style={->, thick, color=thesisBlue},
+        node distance=0.55cm and 0.5cm,
+        arr_gen/.style={->, thick, color=thesisBlue!70!black},
+      ]
+        \node[browser] (browser) {Browser};
+        \node[kotlin, below left=0.6cm and -1.5cm of browser] (ui) {UI Kotlin/JS\\(Compose Multiplatform)};
+        \node[kotlin, below right=0.6cm and -1.2cm of browser] (svc) {Servizio Backend\\(Kotlin/Native)};
+        \node[native, below=0.6cm of svc] (native) {Librerie native (CInterop)};
+        \draw[arr] (browser.south) -- ++(0,-0.2) -| (ui.north);
+        \draw[arr] (browser.south) -- ++(0,-0.2) -| (svc.north);
+        % \draw[arr] (ui.east) -- (svc.west) node[midway, above, font=\tiny] {chiamate};
+        \draw[arr] (svc.south) -| (native.north);
+      \end{tikzpicture}
+      \\[0.3em]
+      {\scriptsize Stesso linguaggio per UI e servizio}
+      \end{center}
+  \end{columns}
 \end{frame}
 
-
-% ============================================================
 \section{Standard FMI e formato FMU (Background)}
-% ============================================================
 
 \begin{frame}{Standard FMI e formato FMU}
   \begin{columns}
-    \column{0.55\textwidth}
+    \column{0.42\textwidth}
       \begin{itemize}
         \item FMI: standard per lo scambio di modelli di simulazione, con interfaccia C
         \item FMU: archivio zip con modello e metadati, secondo lo standard FMI
       \end{itemize}
-    \column{0.4\textwidth}
       \begin{block}{Perché sono rilevanti}
         Caso di studio per validare l'approccio Kotlin fullstack in ambito industriale
       \end{block}
+    \column{0.55\textwidth}
+    \hfill
+    \begin{center}
+        \begin{tikzpicture}[
+            zipbox/.style={draw=thesisBlue, thick, fill=thesisBg, rounded corners=3pt,
+                        minimum width=4.2cm, minimum height=5.0cm, align=center},
+            binbox/.style={draw=thesisBlue!40, dashed, thick, fill=thesisBg!60, rounded corners=2pt,
+            inner sep=0.2cm, align=center, minimum height=2.4cm},
+            item/.style={draw=thesisBlue!60, fill=white, rounded corners=1pt,
+                        minimum width=3.6cm, minimum height=0.55cm,
+                        font=\scriptsize, align=right},
+            itemalt/.style={item, fill=thesisBlue!8},
+            node distance=0.18cm,
+            ]
+            \node[zipbox, label={[font=\scriptsize\bfseries, text=thesisBlue]above:modello.fmu (zip)}] (zip) {};
+            \node[item, anchor=north, yshift=-0.5cm] (xml) at (zip.north) {modelDescription.xml};
+            \node[binbox, below=0.5cm of xml, minimum width=3.8cm, label={[font=\scriptsize\bfseries, text=thesisBlue]above:binaries/src}] (binaries) {binaries/};
+            \node[itemalt, below=of binaries.north] (bwin) {win64};
+            \node[itemalt, below=of bwin] (blin) {linux64};
+            \node[itemalt, below=of blin] (bmac) {darwin64};
+            \node[item, below=0.4cm of bmac] (res) {resources};
+        \end{tikzpicture}
+        \\[0.3em]
+        {\scriptsize Struttura standard di un file FMU secondo FMI 2.0.}
+    \end{center}
   \end{columns}
 \end{frame}
 
-
-% ============================================================
 \section{Architettura}
-% ============================================================
 
 \begin{frame}{Architettura del sistema}
+  \vspace{1em}
+  \begin{figure}
+      \centering
+      \includegraphics[width=\textwidth]{images/diagramma-tirocinio.png}
+      \caption{Architettura generale del sistema.}
+      \label{fig:architettura}
+  \end{figure}
   \begin{columns}
-    \column{0.6\textwidth}
-      \begin{figure}
-          \centering
-          \includegraphics[width=\textwidth]{images/diagramma-tirocinio.png}
-          \caption{Architettura generale del sistema.}
-          \label{fig:architettura}
-      \end{figure}
-    \column{0.38\textwidth}
-      \begin{block}{Linguaggi}
-        \begin{itemize}
+  \begin{column}{0.6\textwidth}
+  \begin{block}{Linguaggi}
+      \centering
+      \begin{itemize}
           \item Frontend: \textbf{Kotlin/JS}
           \item Backend: \textbf{Kotlin/Native}
-          \item Logica di dominio (fmu-kt   ): \textbf{Kotlin/Native}
+          \item Logica di dominio (fmu-kt): \textbf{Kotlin/Native}
           \item Stessa sintassi e semantica
           \item Librerie, backend e runtime diversi
-        \end{itemize}
-      \end{block}
+      \end{itemize}
+  \end{block}
+  \end{column}
   \end{columns}
 \end{frame}
 
-
-% ============================================================
 \section{Architettura: Dettaglio}
-% ============================================================
 
 \begin{frame}{Dettaglio dell'architettura}
   \begin{center}
   \begin{figure}
       \centering
-      \includegraphics[width=0.54\textwidth]{images/diagramma-compilazione.png}
+      \includegraphics[width=\textwidth]{images/diagramma-compilazione-new.png}
       \caption{Come avviene l'integrazione con il codice nativo.}
       \label{fig:nativo}
   \end{figure}
   \end{center}
 \end{frame}
 
-
-% ============================================================
 \section{Supporto sperimentale a sistemi Apple Silicon}
-% ============================================================
 
 \begin{frame}{Supporto sperimentale a sistemi Apple Silicon}
   \begin{columns}
@@ -209,9 +262,6 @@
         \item FMU spesso solo in \texttt{x86\_64}, incompatibili con Apple Silicon
         \item Rosetta 2 non utilizzabile (caricamento dinamico via \texttt{dlopen})
       \end{itemize}
-      % \begin{alertblock}{La domanda}
-      %   Il monolinguaggio regge anche qui?
-      % \end{alertblock}
     \column{0.55\textwidth}
       \begin{center}
       \begin{tikzpicture}[
@@ -223,20 +273,15 @@
         arrow/.style={->, thick, color=thesisBlue},
         node distance=0.6cm and 1.4cm,
       ]
-        % Sorgente
         \node[box] (src) {Sorgenti C modello\\\texttt{sources/}};
-        % Due compilazioni parallele
-        \node[arch, below left=0.9cm and 0.4cm of src] (x86)
+        \node[arch, below left=0.9cm and 0.3cm of src] (x86)
           {Compilazione\\\texttt{-arch x86\_64}};
         \node[arch, below right=0.9cm and 0.4cm of src] (arm)
           {Compilazione\\\texttt{-arch arm64}};
-        % lipo: ben più in basso del bordo inferiore di x86/arm
         \node[box, below=2.2cm of src, fill=thesisGray!15] (lipo)
           {\texttt{lipo}};
-        % Fat binary risultante
         \node[result, below=0.7cm of lipo] (fat)
           {Fat binary\\universale (\texttt{.dylib})};
-        % Frecce: scendono prima, poi vanno verso lipo.north
         \draw[arrow] (src.south) -- ++(0,-0.2) -| (x86.north);
         \draw[arrow] (src.south) -- ++(0,-0.2) -| (arm.north);
         \draw[arrow] (x86.south) -- ++(0,-0.2) -| (lipo.north);
@@ -248,19 +293,7 @@
 \end{frame}
 
 
-% % ============================================================
-% \section{Demo}
-% % ============================================================
-
-% \begin{frame}{Demo dal vivo}
-%   \centering
-%   \Large Dimostrazione pratica dell'applicativo
-% \end{frame}
-
-
-% ============================================================
 \section{Valutazione}
-% ============================================================
 
 \begin{frame}{Valutazione}
   \begin{columns}
@@ -270,42 +303,11 @@
         \item Test di integrazione su FMU pubblici (submodule git + Kotest)
         \item CI su GitHub Actions: Windows, Linux, macOS
       \end{itemize}
-    \column{0.4\textwidth}
-      \begin{block}{Sintesi}
-        Sistema validato, non solo compilato, su tutte le piattaforme target
-      \end{block}
   \end{columns}
 \end{frame}
 
-
-% ============================================================
 \section{Conclusioni e sviluppi futuri}
-% ============================================================
 
-\begin{frame}{Conclusioni}
-  \begin{columns}
-    \column{0.48\textwidth}
-      \begin{block}{Obiettivi raggiunti}
-        \begin{itemize}
-          \item Caricamento FMU (+ ricompilazione su macOS)
-          \item Visualizzazione metadati e variabili
-          \item Configurazione simulazione (variabili, durata, passo)
-          \item Grafico dei risultati
-        \end{itemize}
-      \end{block}
-    \column{0.48\textwidth}
-      \begin{alertblock}{Limitazioni}
-        \begin{itemize}
-            \item Solo standard FMI 2.0
-            \item Ricompilazione macOS: soluzione best-effort
-            \item Kotlin/Native: stdlib limitata, più lavoro manuale (es. API POSIX)
-        \end{itemize}
-      \end{alertblock}
-  \end{columns}
-\end{frame}
-
-
-% ── IMMAGINI ─────────────────────────────────────────────
 \begin{frame}{Conclusioni}
     \begin{columns}
         \column{0.48\textwidth}
@@ -323,22 +325,34 @@
     \end{columns}
 \end{frame}
 
-% ── SVILUPPI FUTURI ─────────────────────────────────────────────
 \begin{frame}{Conclusioni}
-        \centering
-        \begin{block}{Sviluppi futuri}
-            \begin{itemize}
-                \item Supporto ad altre versioni dello standard FMI
-                \item Esportazione dei risultati della simulazione
-                \item Gestione di più modelli FMU in contemporanea
-            \end{itemize}
-        \end{block}
-\end{frame}
-
-% ── SLIDE FINALE ─────────────────────────────────────────────
-\begin{frame}
-  \centering
-  \Large Grazie per l'attenzione\\[0.5em]
+  \begin{columns}
+    \column{0.3\textwidth}
+    \begin{block}{Obiettivi raggiunti}
+      \begin{itemize}
+        \item Caricamento FMU
+        \item Visualizzazione metadati e variabili
+        \item Configurazione simulazione
+        \item Visualizzazione risultati simulazione
+      \end{itemize}
+    \end{block}
+    \column{0.3\textwidth}
+    \begin{alertblock}{Limitazioni}
+      \begin{itemize}
+          \item Solo standard FMI 2.0
+          \item Ricompilazione macOS best effort
+          \item Kotlin/Native: stdlib limitata
+      \end{itemize}
+    \end{alertblock}
+    \column{0.3\textwidth}
+    \begin{block}{Sviluppi futuri}
+      \begin{itemize}
+        \item Supporto ad altre versioni FMI
+        \item Esportazione risultati simulazione
+        \item Gestione più modelli FMU in contemporanea
+      \end{itemize}
+    \end{block}
+  \end{columns}
 \end{frame}
 
 \end{document}
