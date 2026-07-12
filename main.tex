@@ -68,8 +68,8 @@
     \column{0.4\textwidth}
         \begin{itemize}
             \item Stack industriali spesso eterogenei
-            \item Ogni strumento è scritto in linguaggi diversi
-            \item Librerie di standard tecnici scritte in linguaggi nativi
+            \item Stessa esigenza risolta da team diversi, in linguaggi diversi
+            \item Librerie condivise di standard tecnici scritte in linguaggi nativi
         \end{itemize}
     \begin{alertblock}{Problema}
         Duplicazione di codice, complessità, manutenzione difficile
@@ -79,32 +79,25 @@
     \begin{center}
     \begin{tikzpicture}[
       box/.style={draw=thesisBlue, fill=thesisBg, rounded corners=2pt,
-                  minimum width=2.3cm, minimum height=0.6cm,
+                  minimum width=2.3cm, minimum height=0.9cm,
                   font=\scriptsize, align=center},
-      todo/.style={box, draw=thesisAccent, dashed, fill=thesisAccent!5},
-      browser/.style={box, fill=thesisBlue!15, minimum width=7.2cm},
-      native/.style={box, fill=thesisGray!25, minimum width=7.2cm, font=\scriptsize\bfseries},
+      native/.style={box, fill=thesisGray!25, minimum width=7.2cm,
+                  font=\scriptsize\bfseries},
       arr/.style={->, thick, color=thesisBlue},
-      node distance=0.55cm and 0.5cm,
+      dupbox/.style={draw=thesisAccent, dashed, rounded corners=4pt},
+      node distance=0.7cm and 0.5cm,
       ]
-      \node[native] (native) {Librerie native};
-      \node[box, above=0.6cm of native, xshift=-2.5cm] (app1) {App1\\(C++)};
-      \node[box, above=0.6cm of native] (app2) {App2\\(C\#)};
-      \node[box, above=0.6cm of native, xshift=2.5cm] (app3) {App3\\(Go)};
-      \node[todo, above=0.9cm of app1] (svc1) {Servizio\\App1};
-      \node[todo, above=0.9cm of app2] (svc2) {Servizio\\App2};
-      \node[todo, above=0.9cm of app3] (svc3) {Servizio\\App3};
-      \node[browser, above=0.6cm of svc2] (browser) {Browser};
+      \node[native] (native) {Librerie native condivise};
+      \node[box, above=1.2cm of native, xshift=-2.5cm] (app1) {App 1\\(C++)};
+      \node[box, above=1.2cm of native]                (app2) {App 2\\(C\#)};
+      \node[box, above=1.2cm of native, xshift=2.5cm]  (app3) {App 3\\(Go)};
 
       \draw[arr] (app1.south) -- (native.north -| app1);
       \draw[arr] (app2.south) -- (native.north);
       \draw[arr] (app3.south) -- (native.north -| app3);
-      \draw[arr] (svc1.south) -- (app1.north);
-      \draw[arr] (svc2.south) -- (app2.north);
-      \draw[arr] (svc3.south) -- (app3.north);
-      \draw[arr] (browser.south -| svc1) -- (svc1.north);
-      \draw[arr] (browser.south) -- (svc2.north);
-      \draw[arr] (browser.south -| svc3) -- (svc3.north);
+
+      \node[dupbox, fit=(app1)(app2)(app3), inner sep=6pt] (dup) {};
+      \node[font=\tiny, text=thesisAccent, above=2pt of dup] {N linguaggi, logica duplicata};
     \end{tikzpicture}
     \\[0.3em]
     {\scriptsize Applicativi diversi, ma stesse librerie}
@@ -256,7 +249,7 @@
     \column{0.42\textwidth}
       \begin{itemize}
         \item FMU spesso solo in \texttt{x86\_64}, incompatibili con Apple Silicon
-        \item Rosetta 2 non utilizzabile (caricamento dinamico via \texttt{dlopen})
+        \item Aggiunta preprocessing esclusivamente per piattaforme MacOS
       \end{itemize}
     \column{0.55\textwidth}
       \begin{center}
@@ -292,13 +285,60 @@
 \section{Valutazione}
 
 \begin{frame}{Valutazione}
-  \begin{columns}
-    \column{0.55\textwidth}
-      \begin{itemize}
-        \item Test unitari dei moduli
-        \item Test di integrazione su FMU pubblici (submodule git + Kotest)
-        \item CI su GitHub Actions: Windows, Linux, macOS
-      \end{itemize}
+  \begin{itemize}
+    \item Test unitari dei moduli
+    \item Test di integrazione su FMU pubblici (submodule git + Kotest)
+    \item CI su GitHub Actions: Windows, Linux, macOS
+  \end{itemize}
+  \vspace{1.5em}
+  \begin{columns}[t]
+    \column{0.5\textwidth}
+    \centering
+    \begin{tikzpicture}[
+      box/.style={draw=thesisBlue, fill=thesisBg, rounded corners=2pt,
+                  minimum width=2.9cm, minimum height=0.75cm,
+                  font=\scriptsize, align=center},
+      steps/.style={box, fill=thesisBlue!35, font=\scriptsize\bfseries},
+      fail/.style={box, fill=red!15, draw=red!60, font=\scriptsize, minimum width=1.6cm},
+      arr/.style={->, thick, color=thesisBlue},
+      arrfail/.style={->, thick, color=red!70, dashed},
+      node distance=0.55cm and 0.6cm,
+      ]
+
+      \node[steps] (build) {Build applicativo};
+      \node[steps, below=0.6cm of build] (test) {Esecuzione test};
+      \node[steps, below=0.6cm of test] (health) {Health check backend};
+      \node[fail, right=1.1cm of test] (fail) {Upload report};
+      \draw[arr] (build.south) -- (test.north);
+      \draw[arr] (test.south) -- (health.north);
+      \draw[arrfail] (test.east) -- node[above,font=\tiny,color=red!70]{on failure} (fail.west);
+      \end{tikzpicture}
+    \\[0.3em]
+    {\scriptsize Pipeline CI (build \& test).}
+
+    \column{0.5\textwidth}
+    \centering
+    \begin{tikzpicture}[
+      box/.style={draw=thesisBlue, fill=thesisBg, rounded corners=2pt,
+                  minimum width=2.9cm, minimum height=0.75cm,
+                  font=\scriptsize, align=center},
+      steps/.style={box, fill=thesisBlue!35, font=\scriptsize\bfseries},
+      fail/.style={box, fill=red!15, draw=red!60, font=\scriptsize, minimum width=1.6cm},
+      arr/.style={->, thick, color=thesisBlue},
+      arrfail/.style={->, thick, color=red!70, dashed},
+      node distance=0.55cm and 0.6cm,
+      ]
+      
+      \node[steps] (dbuild) {Build immagine\\(con caching)};
+      \node[steps, below=0.6cm of dbuild] (drun) {Avvio container};
+      \node[steps, below=0.6cm of drun] (dhealth) {Health check};
+      \node[fail, right=1.1cm of dhealth] (dfail) {Log container};
+      \draw[arr] (dbuild.south) -- (drun.north);
+      \draw[arr] (drun.south) -- (dhealth.north);
+      \draw[arrfail] (dhealth.east) -- node[above,font=\tiny,color=red!70]{on failure} (dfail.west);
+    \end{tikzpicture}
+    \\[0.3em]
+    {\scriptsize Pipeline test Docker.}
   \end{columns}
 \end{frame}
 
